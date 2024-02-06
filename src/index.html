@@ -6,17 +6,36 @@
     <title>Weather App</title>
   </head>
   <body>
-    <div id="content">
+    <main>
       <div id="search-container">
         <div>What's the weather?</div>
         <div id="search-form">
-          <input type="text" placeholder="Enter city name" id="search-bar" />
+          <input type="text" placeholder="Location" id="search-bar" />
           <button id="search-button">Search</button>
         </div>
       </div>
       <div id="result-container">
         <h1 id="location"></h1>
+        <h3 id="date-today"></h3>
+        <h4 id="last-updated"></h4>
+        <div id="weather-forecast">
+          <div class="card" id="today">
+            <h1>Today</h1>
+          </div>
+          <div class="card" id="tomorrow">
+            <h1>Tomorrow</h1>
+          </div>
+          <div class="card" id="day-after-tomorrow">
+            <h1>Day After Tomorrow</h1>
+          </div>
+        </div>
       </div>
-    </div>
+      <div id="error-container">No matching location found.</div>
+      <footer>
+        <p>Powered by <a href="https://weatherapi.com">WeatherAPI.com</a></p>
+        <p>Made by <a href="https://github.com/vndlgd">Ivan Delgado</a></p>
+        <p>Icons by <a href="https://bas.dev/work/meteocons">Meteocons</a></p>
+      </footer>
+    </main>
   </body>
 </html>
