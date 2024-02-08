@@ -11,20 +11,18 @@
         <div>What's the weather?</div>
         <div id="search-form">
           <input type="text" placeholder="Location" id="search-bar" />
-          <button id="search-button">Search</button>
+          <button type="submit" id="search-button">Search</button>
         </div>
       </div>
       <div id="result-container">
-        <h1 id="location"></h1>
-        <h3 id="date-today"></h3>
-        <h4 id="last-updated"></h4>
-        <div id="weather-forecast">
-          <div class="card" id="today">
-            <h1>Today</h1>
-          </div>
-          <div class="card" id="tomorrow">
-            <h1>Tomorrow</h1>
-          </div>
+        <div id="result-header">
+          <h1 id="location"></h1>
+          <h3 id="date-today"></h3>
+          <h4 id="last-updated"></h4>
+        </div>
+        <div id="weather-container">
+          <div class="card" id="today"><h1>Today</h1></div>
+          <div class="card" id="tomorrow"><h1>Tomorrow</h1></div>
           <div class="card" id="day-after-tomorrow">
             <h1>Day After Tomorrow</h1>
           </div>

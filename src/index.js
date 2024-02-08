@@ -1,9 +1,20 @@
 import './style.css'; // Import the CSS file
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+
+const daysOfWeek = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+];
 
 const resultContainer = document.querySelector('#result-container');
 const errorContainer = document.querySelector('#error-container');
 const searchContainer = document.querySelector('#search-container');
+const weatherContainer = document.querySelector('#weather-container');
 
 const searchBar = document.querySelector('#search-bar');
 const searchButton = document.querySelector('#search-button');
@@ -12,11 +23,20 @@ const location = document.querySelector('#location');
 const dateToday = document.querySelector('#date-today');
 const lastUpdated = document.querySelector('#last-updated');
 
-const today = document.querySelector('#today');
-const tomorrow = document.querySelector('#tomorrow');
-const dayAfterTomorrow = document.querySelector('#day-after-tomorrow');
+let firstValidSearch = true;
 
+const DOM = DOMController();
+
+const cards = document.querySelectorAll('.card');
+
+// two event listeners to trigger location fetch
 searchButton.addEventListener('click', fetchLocation);
+searchBar.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    fetchLocation();
+  }
+});
 
 // create async function
 async function fetchLocation() {
@@ -24,17 +44,21 @@ async function fetchLocation() {
     // prepare searchValue for api
     let searchValue = searchBar.value.replace(' ', '-').toLowerCase();
     const response = await fetch(
-      'http://api.weatherapi.com/v1/current.json?key=e0b3e243fbb04b31a0891012240202&q=' +
-        searchValue
+      'http://api.weatherapi.com/v1/forecast.json?key=e0b3e243fbb04b31a0891012240202&q=' +
+        searchValue +
+        '&days=3&aqi=no&alerts=no'
     );
 
     const locationData = await response.json();
 
-    resultContainer.style.display = 'flex';
-    resultContainer.style.flex = '5';
-    searchContainer.style.marginTop = '10vh';
+    // if successful fetch, display weather
+    // hide error message incase previous fetch returned error message
+    DOM.displayWeather();
+    DOM.hideErrorMessage();
 
-    errorContainer.style.display = 'none';
+    // console message
+    console.log('Fetching current weather data from API...');
+    console.log(locationData);
 
     location.textContent = `${locationData.location.name} - ${locationData.location.country}`;
     dateToday.textContent = new Date().toLocaleString('en-US', {
@@ -49,15 +73,180 @@ async function fetchLocation() {
     });
     lastUpdated.textContent = `Last updated: ${locationData.current.last_updated}`;
 
-    // weather forecast
-    console.log('Fetching current weather data from API...');
-    console.log(locationData);
+    // array of 3-day weather forecast
+    const weatherForecast = [];
+    locationData.forecast.forecastday.forEach((day) => {
+      weatherForecast.push(day);
+    });
+
+    console.log(weatherForecast);
+
+    for (let i = 0; i < weatherForecast.length; i++) {
+      // clear DOM before
+      if (firstValidSearch) {
+        firstValidSearch = false;
+      } else {
+        DOM.removeChildrenExceptFirst(cards[i]);
+      }
+
+      let yearMonthDay = weatherForecast[i].date;
+      let fullDate = new Date(yearMonthDay + 'T00:00'); // to create date object in local time
+      const options = { weekday: 'long' };
+      let weekday = new Intl.DateTimeFormat('en-US', options).format(fullDate);
+
+      let condition = weatherForecast[i].day.condition.text; // condition
+
+      let averageTempF = weatherForecast[i].day.avgtemp_f; // temp F
+      let averageTempC = weatherForecast[i].day.avgtemp_c; // temp C
+      console.log(`${averageTempF} °F | ${averageTempC} °C`);
+
+      let windspeed = weatherForecast[i].day.maxwind_mph;
+      let humidity = weatherForecast[i].day.avghumidity;
+      console.log(`Wind: ${windspeed} mph`);
+      console.log(`Humidity: ${humidity}%`);
+
+      // weatherContainer.children[i].appendChild(weekday);
+      DOM.populateWeatherDivs(
+        weekday,
+        condition,
+        averageTempF,
+        averageTempC,
+        windspeed,
+        humidity,
+        i
+      );
+
+      console.log('\n');
+    }
+
+    console.log('------------');
   } catch (err) {
-    resultContainer.style.display = 'none';
-    errorContainer.style.display = 'flex';
-    errorContainer.style.display = 'flex';
-    errorContainer.style.flex = '5';
-    searchContainer.style.marginTop = '10vh';
-    console.log(err);
+    DOM.hideWeather();
+    DOM.showErrorMessage();
+    console.error(err);
   }
 }
+
+function DOMController() {
+  function displayWeather() {
+    searchContainer.style.marginTop = '10vh'; // for styling
+    resultContainer.style.display = 'flex';
+    resultContainer.style.flex = '5';
+  }
+
+  function hideWeather() {
+    resultContainer.style.display = 'none';
+  }
+
+  function showErrorMessage() {
+    searchContainer.style.marginTop = '10vh'; // for styling
+    errorContainer.style.display = 'flex';
+    errorContainer.style.flex = '5';
+  }
+
+  function hideErrorMessage() {
+    errorContainer.style.display = 'none';
+  }
+
+  function removeChildrenExceptFirst(parent) {
+    // Get the first child of the parent
+    const firstChild = parent.firstChild;
+    // 2nd condition to avoid removing last card's first header when cards are initially empty
+    while (
+      parent.childNodes.length > 1 &&
+      parent.lastChild.textContent !== 'Day After Tomorrow'
+    ) {
+      parent.removeChild(parent.lastChild);
+    }
+  }
+
+  function populateWeatherDivs(
+    weekday,
+    condition,
+    averageTempF,
+    averageTempC,
+    windspeed,
+    humidity,
+    index
+  ) {
+    const weekdayHeader = document.createElement('div');
+    weekdayHeader.textContent = weekday;
+
+    const conditionHeader = document.createElement('div');
+    conditionHeader.textContent = condition;
+
+    const tempDiv = document.createElement('div');
+    tempDiv.setAttribute('class', 'temp-container');
+
+    const tempF = document.createElement('h2');
+    const tempC = document.createElement('h2');
+    const tempFButton = document.createElement('button');
+    const tempCButton = document.createElement('button');
+
+    tempF.textContent = `${averageTempF}`;
+    tempF.setAttribute('class', 'fahren');
+
+    tempC.textContent = `${averageTempC}`;
+    tempC.setAttribute('class', 'celsius');
+
+    tempFButton.setAttribute('class', 'fahren-button');
+    tempFButton.classList.add('selected');
+    tempFButton.textContent = `°F`;
+
+    tempCButton.setAttribute('class', 'celsius-button');
+    tempCButton.textContent = `°C`;
+
+    tempDiv.appendChild(tempF);
+    tempDiv.appendChild(tempC);
+    tempDiv.appendChild(tempFButton);
+    tempDiv.appendChild(tempCButton);
+
+    const windHeader = document.createElement('div');
+    windHeader.textContent = `Wind: ${windspeed} mph`;
+
+    const humidityHeader = document.createElement('div');
+    humidityHeader.textContent = `Humidity: ${humidity}%`;
+
+    weatherContainer.children[index].appendChild(weekdayHeader);
+    weatherContainer.children[index].appendChild(conditionHeader);
+    weatherContainer.children[index].appendChild(tempDiv);
+    weatherContainer.children[index].appendChild(windHeader);
+    weatherContainer.children[index].appendChild(humidityHeader);
+
+    // TODO: add a gif from Meteocons
+  }
+
+  return {
+    displayWeather,
+    hideWeather,
+    showErrorMessage,
+    hideErrorMessage,
+    removeChildrenExceptFirst,
+    populateWeatherDivs,
+  };
+}
+
+// handle DOM selection, highlighting, and display of Fahren and Celsius temperatures and buttons
+resultContainer.addEventListener('click', (e) => {
+  const celsiusValues = document.querySelectorAll('.celsius');
+  const fahrenValues = document.querySelectorAll('.fahren');
+  if (e.target.classList.contains('fahren-button')) {
+    e.target.classList.add('selected');
+    e.target.nextSibling.classList.remove('selected');
+    fahrenValues.forEach((fahren) => {
+      fahren.style.display = 'block';
+    });
+    celsiusValues.forEach((celsius) => {
+      celsius.style.display = 'none';
+    });
+  } else if (e.target.classList.contains('celsius-button')) {
+    e.target.classList.add('selected');
+    e.target.previousSibling.classList.remove('selected');
+    celsiusValues.forEach((celsius) => {
+      celsius.style.display = 'block';
+    });
+    fahrenValues.forEach((fahren) => {
+      fahren.style.display = 'none';
+    });
+  }
+});
