@@ -17,6 +17,7 @@ h4,
 h5,
 h6 {
   color: var(--text-color);
+  white-space: nowrap;
 }
 
 button {
@@ -150,7 +151,7 @@ footer {
 }
 
 .fahren {
-  display: block;
+  display: none;
 }
 
 .celsius {
@@ -163,4 +164,12 @@ footer {
 
 button:hover {
   color: var(--text-color);
+}
+
+.preferFahren > .temp-container > .fahren {
+  display: block;
+}
+
+.preferCelsius > .temp-container > .celsius {
+  display: block;
 }

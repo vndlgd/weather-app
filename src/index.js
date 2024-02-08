@@ -207,6 +207,9 @@ function DOMController() {
     const humidityHeader = document.createElement('div');
     humidityHeader.textContent = `Humidity: ${humidity}%`;
 
+    // display with fahren first
+    weatherContainer.children[index].classList.add('preferFahren');
+
     weatherContainer.children[index].appendChild(weekdayHeader);
     weatherContainer.children[index].appendChild(conditionHeader);
     weatherContainer.children[index].appendChild(tempDiv);
@@ -227,26 +230,36 @@ function DOMController() {
 }
 
 // handle DOM selection, highlighting, and display of Fahren and Celsius temperatures and buttons
-resultContainer.addEventListener('click', (e) => {
-  const celsiusValues = document.querySelectorAll('.celsius');
-  const fahrenValues = document.querySelectorAll('.fahren');
-  if (e.target.classList.contains('fahren-button')) {
-    e.target.classList.add('selected');
-    e.target.nextSibling.classList.remove('selected');
-    fahrenValues.forEach((fahren) => {
-      fahren.style.display = 'block';
-    });
-    celsiusValues.forEach((celsius) => {
-      celsius.style.display = 'none';
-    });
-  } else if (e.target.classList.contains('celsius-button')) {
-    e.target.classList.add('selected');
-    e.target.previousSibling.classList.remove('selected');
-    celsiusValues.forEach((celsius) => {
-      celsius.style.display = 'block';
-    });
-    fahrenValues.forEach((fahren) => {
-      fahren.style.display = 'none';
+function updateTempMetric(event) {
+  const answerCards = document.querySelectorAll('.card');
+  const fahrenBtns = document.querySelectorAll('.fahren-button');
+  const celsiusBtns = document.querySelectorAll('.celsius-button');
+
+  if (event.target.classList.contains('fahren-button')) {
+    answerCards.forEach((card) => {
+      card.classList.add('preferFahren');
+      card.classList.remove('preferCelsius');
+      fahrenBtns.forEach((btn) => {
+        btn.style.color = 'var(--text-color)';
+      });
+      celsiusBtns.forEach((btn) => {
+        btn.style.color = 'var(--text-color-light)';
+      });
     });
   }
-});
+
+  if (event.target.classList.contains('celsius-button')) {
+    answerCards.forEach((card) => {
+      card.classList.add('preferCelsius');
+      card.classList.remove('preferFahren');
+    });
+    fahrenBtns.forEach((btn) => {
+      btn.style.color = 'var(--text-color-light)';
+    });
+    celsiusBtns.forEach((btn) => {
+      btn.style.color = 'var(--text-color)';
+    });
+  }
+}
+
+resultContainer.addEventListener('click', updateTempMetric);
