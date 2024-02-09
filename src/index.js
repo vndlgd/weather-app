@@ -44,7 +44,7 @@ async function fetchLocation() {
     // prepare searchValue for api
     let searchValue = searchBar.value.replace(' ', '-').toLowerCase();
     const response = await fetch(
-      'http://api.weatherapi.com/v1/forecast.json?key=e0b3e243fbb04b31a0891012240202&q=' +
+      'https://api.weatherapi.com/v1/forecast.json?key=e0b3e243fbb04b31a0891012240202&q=' +
         searchValue +
         '&days=3&aqi=no&alerts=no'
     );
