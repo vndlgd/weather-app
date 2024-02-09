@@ -70,6 +70,10 @@ main {
   padding: 5px 10px;
 }
 
+#search-button {
+  color: var(--text-color);
+}
+
 #result-header {
   text-align: center;
 }
@@ -90,8 +94,16 @@ footer {
   bottom: 0;
   width: 100%;
   color: var(--text-color);
-  text-align: center;
   margin-bottom: 20px;
+}
+
+footer p {
+  display: flex;
+  align-items: center;
+}
+
+footer img {
+  padding: 5px;
 }
 
 #last-updated {
@@ -172,4 +184,23 @@ button:hover {
 
 .preferCelsius > .temp-container > .celsius {
   display: block;
+}
+
+.weekday,
+.condition,
+.wind,
+.humidity {
+  color: var(--text-color);
+  font-weight: 400;
+  font-size: 2rem;
+}
+
+.wind,
+.humidity {
+  font-size: 1.5rem;
+}
+
+.icon {
+  width: 64px;
+  height: 64px;
 }

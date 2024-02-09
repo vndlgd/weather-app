@@ -105,6 +105,9 @@ async function fetchLocation() {
       console.log(`Wind: ${windspeed} mph`);
       console.log(`Humidity: ${humidity}%`);
 
+      // section that handles populating the images
+      let iconLink = weatherForecast[i].day.condition.icon;
+
       // weatherContainer.children[i].appendChild(weekday);
       DOM.populateWeatherDivs(
         weekday,
@@ -113,6 +116,7 @@ async function fetchLocation() {
         averageTempC,
         windspeed,
         humidity,
+        iconLink,
         i
       );
 
@@ -167,12 +171,15 @@ function DOMController() {
     averageTempC,
     windspeed,
     humidity,
+    iconLink,
     index
   ) {
     const weekdayHeader = document.createElement('div');
+    weekdayHeader.setAttribute('class', 'weekday');
     weekdayHeader.textContent = weekday;
 
     const conditionHeader = document.createElement('div');
+    conditionHeader.setAttribute('class', 'condition');
     conditionHeader.textContent = condition;
 
     const tempDiv = document.createElement('div');
@@ -202,10 +209,16 @@ function DOMController() {
     tempDiv.appendChild(tempCButton);
 
     const windHeader = document.createElement('div');
+    windHeader.setAttribute('class', 'wind');
     windHeader.textContent = `Wind: ${windspeed} mph`;
 
     const humidityHeader = document.createElement('div');
+    humidityHeader.setAttribute('class', 'humidity');
     humidityHeader.textContent = `Humidity: ${humidity}%`;
+
+    let icon = new Image();
+    icon.setAttribute('class', 'icon');
+    icon.src = iconLink;
 
     // display with fahren first
     weatherContainer.children[index].classList.add('preferFahren');
@@ -215,8 +228,40 @@ function DOMController() {
     weatherContainer.children[index].appendChild(tempDiv);
     weatherContainer.children[index].appendChild(windHeader);
     weatherContainer.children[index].appendChild(humidityHeader);
+    weatherContainer.children[index].appendChild(icon);
+  }
 
-    // TODO: add a gif from Meteocons
+  // handle DOM selection, highlighting, and display of Fahren and Celsius temperatures and buttons
+  function updateTempMetric(event) {
+    const answerCards = document.querySelectorAll('.card');
+    const fahrenBtns = document.querySelectorAll('.fahren-button');
+    const celsiusBtns = document.querySelectorAll('.celsius-button');
+
+    if (event.target.classList.contains('fahren-button')) {
+      answerCards.forEach((card) => {
+        card.classList.add('preferFahren');
+        card.classList.remove('preferCelsius');
+        fahrenBtns.forEach((btn) => {
+          btn.style.color = 'var(--text-color)';
+        });
+        celsiusBtns.forEach((btn) => {
+          btn.style.color = 'var(--text-color-light)';
+        });
+      });
+    }
+
+    if (event.target.classList.contains('celsius-button')) {
+      answerCards.forEach((card) => {
+        card.classList.add('preferCelsius');
+        card.classList.remove('preferFahren');
+      });
+      fahrenBtns.forEach((btn) => {
+        btn.style.color = 'var(--text-color-light)';
+      });
+      celsiusBtns.forEach((btn) => {
+        btn.style.color = 'var(--text-color)';
+      });
+    }
   }
 
   return {
@@ -226,40 +271,8 @@ function DOMController() {
     hideErrorMessage,
     removeChildrenExceptFirst,
     populateWeatherDivs,
+    updateTempMetric,
   };
 }
 
-// handle DOM selection, highlighting, and display of Fahren and Celsius temperatures and buttons
-function updateTempMetric(event) {
-  const answerCards = document.querySelectorAll('.card');
-  const fahrenBtns = document.querySelectorAll('.fahren-button');
-  const celsiusBtns = document.querySelectorAll('.celsius-button');
-
-  if (event.target.classList.contains('fahren-button')) {
-    answerCards.forEach((card) => {
-      card.classList.add('preferFahren');
-      card.classList.remove('preferCelsius');
-      fahrenBtns.forEach((btn) => {
-        btn.style.color = 'var(--text-color)';
-      });
-      celsiusBtns.forEach((btn) => {
-        btn.style.color = 'var(--text-color-light)';
-      });
-    });
-  }
-
-  if (event.target.classList.contains('celsius-button')) {
-    answerCards.forEach((card) => {
-      card.classList.add('preferCelsius');
-      card.classList.remove('preferFahren');
-    });
-    fahrenBtns.forEach((btn) => {
-      btn.style.color = 'var(--text-color-light)';
-    });
-    celsiusBtns.forEach((btn) => {
-      btn.style.color = 'var(--text-color)';
-    });
-  }
-}
-
-resultContainer.addEventListener('click', updateTempMetric);
+resultContainer.addEventListener('click', DOM.updateTempMetric);
